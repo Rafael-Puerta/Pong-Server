@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000
 // Activate HTTP server
 const httpServer = app.listen(port, appListen)
 function appListen () {
-  console.log(`Listening for HTTP queries on: http://localhost:${port}`)
+  //console.log(`Listening for HTTP queries on: http://localhost:${port}`)
 }
 
 // Run WebSocket server
@@ -34,16 +34,38 @@ wss.on('connection', (ws) => {
 
   // Add client to the clients list
   const id = uuidv4()
-  const color = Math.floor(Math.random() * 360)
-  const metadata = { id, color }
-  socketsClients.set(ws, metadata)
+  // const color = Math.floor(Math.random() * 360)
+  // const metadata = { id, color }
+  if(socketsClients.has("pl1")){
+    if(socketsClients.has("pl2")){
+      ws.close();
+    }else{
+
+      socketsClients.set("pl2",ws)
+      //TODO start game
+      
+    }
+
+  }else{
+    socketsClients.set("pl1",ws)
+  }
 
   // Send clients list to everyone
-  sendClients()
+  // sendClients()
 
   // What to do when a client is disconnected
   ws.on("close", () => {
-    socketsClients.delete(ws)
+    if(socketsClients.has("pl1")){
+      if(socketsClients.has("pl2")){
+        if(socketsClients.get("pl2").ws==ws){
+          socketsClients.delete("pl2")
+        }
+      }
+      if(socketsClients.get("pl1").ws==ws){
+        socketsClients.delete("pl1")
+      }
+    }
+    
   })
 
   // What to do when a client message is received
@@ -68,19 +90,19 @@ wss.on('connection', (ws) => {
 })
 
 // Send clientsIds to everyone
-function sendClients () {
-  var clients = []
-  socketsClients.forEach((value, key) => {
-    clients.push(value.id)
-  })
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      var id = socketsClients.get(client).id
-      var messageAsString = JSON.stringify({ type: "clients", id: id, list: clients })
-      client.send(messageAsString)
-    }
-  })
-}
+// function sendClients () {
+//   var clients = []
+//   socketsClients.forEach((value, key) => {
+//     clients.push(value.id)
+//   })
+//   wss.clients.forEach((client) => {
+//     if (client.readyState === WebSocket.OPEN) {
+//       var id = socketsClients.get(client).id
+//       var messageAsString = JSON.stringify({ type: "clients", id: id, list: clients })
+//       client.send(messageAsString)
+//     }
+//   })
+// }
 
 // Send a message to all websocket clients
 async function broadcast (obj) {
@@ -103,23 +125,3 @@ async function private (obj) {
   })
 }
 
-// Perform a query to the database
-function queryDatabase (query) {
-
-  return new Promise((resolve, reject) => {
-    var connection = mysql.createConnection({
-      host: process.env.MYSQLHOST || "localhost",
-      port: process.env.MYSQLPORT || 3306,
-      user: process.env.MYSQLUSER || "root",
-      password: process.env.MYSQLPASSWORD || "",
-      database: process.env.MYSQLDATABASE || "test"
-    });
-
-    connection.query(query, (error, results) => { 
-      if (error) reject(error);
-      resolve(results)
-    });
-     
-    connection.end();
-  })
-}
