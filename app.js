@@ -139,8 +139,17 @@ function gameLoop() {
        console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
        // Cridar aquí la funció que actualitza el joc (segons currentFPS)
        // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
-       utils.run(currentFPS.toFixed(2))
-       
+       if(socketsClients.has("pl1")){
+        if(socketsClients.has("pl2")){
+          // if the players are online the game starts
+          utils.run(currentFPS.toFixed(2))
+          // TODO broadcaste neccesary info for the game
+          
+        }
+      }
+
+      // test with no players online
+      utils.run(currentFPS.toFixed(2))
    }
 
    const endTime = Date.now();

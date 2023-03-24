@@ -1,12 +1,20 @@
+// TODO implement player 2
 var borderSize = 5;
 var playerPoints = 0;
 var playerX = Number.POSITIVE_INFINITY;
 var playerY = Number.POSITIVE_INFINITY;
 
-var playerWidth = 200;
-var playerHalf = playerWidth / 2;
-var playerHeight = 5;
-var playerSpeed = 250;
+//variables player 2 not tested
+var playerPoints2 = 0;
+var player2X = Number.POSITIVE_INFINITY;
+var player2Y = Number.POSITIVE_INFINITY;
+var playerDirection2="none";
+// end variables player2
+
+var playerWidth = 200; // use for the 2 players
+var playerHalf = playerWidth / 2; // use for the 2 players
+var playerHeight = 5; // use for the 2 players
+var playerSpeed = 250; // use for the 2 players
 var playerSpeedIncrement = 15;
 var playerDirection = "none";
 
@@ -25,6 +33,7 @@ function run(fps) {
     const boardWidth = 800;
     const boardHeight = 600;
 
+    // TODO change the X movement to Y movement, the cases to up and down 
     // Move player
     switch (playerDirection) {
         case "right":
@@ -32,6 +41,14 @@ function run(fps) {
             break;
         case "left":
             playerX = playerX - playerSpeed / fps;
+            break;
+    }
+    switch (playerDirection2) {
+        case "right":
+            player2X = player2X + playerSpeed / fps; 
+            break;
+        case "left":
+            player2X = player2X - playerSpeed / fps;
             break;
     }
 
@@ -70,6 +87,7 @@ function run(fps) {
             break;
     }
 
+    // TODO maybe we can use this for the player 2?
     // Check ball collision with board sides
     const lineBall = [[ballX, ballY], [ballNextX, ballNextY]];
 
