@@ -3,6 +3,7 @@ const fs = require('fs/promises')
 const url = require('url')
 const post = require('./post.js')
 const { v4: uuidv4 } = require('uuid')
+const utils=require('./functions/gameLogic.js')
 
 // Wait 'ms' milliseconds
 function wait (ms) {
@@ -26,12 +27,11 @@ const WebSocket = require('ws')
 const wss = new WebSocket.Server({ server: httpServer })
 const socketsClients = new Map()
 console.log(`Listening for WebSocket queries on ${port}`)
-
+// utils.run(30)
 // What to do when a websocket client connects
 wss.on('connection', (ws) => {
 
   console.log("Client connected")
-
   // Add client to the clients list
   const id = uuidv4()
   // const color = Math.floor(Math.random() * 360)
@@ -124,4 +124,37 @@ async function private (obj) {
     }
   })
 }
+
+const TARGET_FPS = 30;
+const TARGET_MS = 1000 / TARGET_FPS;
+let frameCount = 0;
+let fpsStartTime = Date.now();
+let currentFPS = 0;
+
+function gameLoop() {
+   const startTime = Date.now();
+
+   if (currentFPS >= 1) {
+       // Podeu treure la següent línia per millorar el rendiment
+       console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
+       // Cridar aquí la funció que actualitza el joc (segons currentFPS)
+       // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
+       utils.run(currentFPS.toFixed(2))
+       
+   }
+
+   const endTime = Date.now();
+   const elapsedTime = endTime - startTime;
+   const remainingTime = Math.max(1, TARGET_MS - elapsedTime);
+
+   frameCount++;
+   const fpsElapsedTime = endTime - fpsStartTime;
+   if (fpsElapsedTime >= 500) {
+       currentFPS = (frameCount / fpsElapsedTime) * 1000;
+       frameCount = 0;
+       fpsStartTime = endTime;
+   }
+   setTimeout(() => { setImmediate(gameLoop); }, remainingTime);
+}
+gameLoop();
 
