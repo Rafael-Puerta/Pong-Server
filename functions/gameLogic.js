@@ -14,7 +14,7 @@ var playerDirection2="none";
 // end variables player2
 
 var playerWidth = 5; // use for the 2 players
-var playerHalf = playerWidth / 2; // use for the 2 players
+var playerHalf = playerHeight / 2; // use for the 2 players
 var playerHeight = 200; // use for the 2 players
 var playerSpeed = 250; // use for the 2 players
 var playerSpeedIncrement = 15;
@@ -55,16 +55,25 @@ function run(fps) {
     }
 
     // Keep player in bounds
-    const playerMinX = playerHalf;
-    const playerMaxX = boardWidth - playerHalf;
+    const playerMinY = playerHalf;
+    const playerMaxY = boardHeight - playerHalf;
 
-    if (playerX < playerMinX) {
+    if (playerY < playerMinY) {
 
-        playerX = playerMinX;
+        playerY = playerMinY;
 
-    } else if (playerX > playerMaxX) {
+    } else if (playerY > playerMaxY) {
 
-        playerX = playerMaxX;
+        playerY = playerMaxY;
+    }
+    
+    if (player2Y < playerMinY) {
+
+        player2Y = playerMinY;
+
+    } else if (player2Y > playerMaxY) {
+
+        player2Y = playerMaxY;
     }
 
     // Move ball
