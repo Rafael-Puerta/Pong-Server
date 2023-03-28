@@ -125,7 +125,7 @@ async function private (obj) {
   })
 }
 
-const TARGET_FPS = 30;
+const TARGET_FPS = 60;
 const TARGET_MS = 1000 / TARGET_FPS;
 let frameCount = 0;
 let fpsStartTime = Date.now();
@@ -136,7 +136,7 @@ function gameLoop() {
 
    if (currentFPS >= 1) {
        // Podeu treure la següent línia per millorar el rendiment
-       console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
+      //  console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
        // Cridar aquí la funció que actualitza el joc (segons currentFPS)
        // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
        if(socketsClients.has("pl1")){
