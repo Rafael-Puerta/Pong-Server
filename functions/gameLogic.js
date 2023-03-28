@@ -4,6 +4,8 @@ var playerPoints = 0;
 var playerX = Number.POSITIVE_INFINITY;
 var playerY = Number.POSITIVE_INFINITY;
 
+var gameStatus="running"
+
 //variables player 2 not tested
 var playerPoints2 = 0;
 var player2X = Number.POSITIVE_INFINITY;
@@ -11,20 +13,20 @@ var player2Y = Number.POSITIVE_INFINITY;
 var playerDirection2="none";
 // end variables player2
 
-var playerWidth = 200; // use for the 2 players
+var playerWidth = 5; // use for the 2 players
 var playerHalf = playerWidth / 2; // use for the 2 players
-var playerHeight = 5; // use for the 2 players
+var playerHeight = 200; // use for the 2 players
 var playerSpeed = 250; // use for the 2 players
 var playerSpeedIncrement = 15;
 var playerDirection = "none";
 
-var ballX = Number.POSITIVE_INFINITY;
-var ballY = Number.POSITIVE_INFINITY;
+var ballX = 400;
+var ballY = 300;
 var ballSize = 15;
 var ballHalf = ballSize / 2;
 var ballSpeed = 200;
 var ballSpeedIncrement = 25;
-var ballDirection = "upRight";
+var ballDirection = "downRight";
 
 function run(fps) {
 
@@ -32,23 +34,23 @@ function run(fps) {
 
     const boardWidth = 800;
     const boardHeight = 600;
-
-    // TODO change the X movement to Y movement, the cases to up and down 
-    // Move player
+    console.log(ballX,ballY,gameStatus,ballDirection);
+    
+    // Move player MODIFIED
     switch (playerDirection) {
-        case "right":
-            playerX = playerX + playerSpeed / fps; 
+        case "up":
+            playerY = playerY + playerSpeed / fps; 
             break;
-        case "left":
-            playerX = playerX - playerSpeed / fps;
+        case "down":
+            playerY = playerY - playerSpeed / fps;
             break;
     }
     switch (playerDirection2) {
-        case "right":
-            player2X = player2X + playerSpeed / fps; 
+        case "up":
+            player2Y = player2Y + playerSpeed / fps; 
             break;
-        case "left":
-            player2X = player2X - playerSpeed / fps;
+        case "down":
+            player2Y = player2Y - playerSpeed / fps;
             break;
     }
 
@@ -91,43 +93,45 @@ function run(fps) {
     // Check ball collision with board sides
     const lineBall = [[ballX, ballY], [ballNextX, ballNextY]];
 
-    const lineBoardLeft = [[borderSize, 0], [borderSize, boardHeight]];
-    const intersectionLeft = findIntersection(lineBall, lineBoardLeft);
+    // const lineBoardLeft = [[borderSize, 0], [borderSize, boardHeight]];
+    // const intersectionLeft = findIntersection(lineBall, lineBoardLeft);
 
-    const boardMaxX = boardWidth - borderSize;
-    const lineBoardRight = [[boardMaxX, 0], [boardMaxX, boardHeight]];
-    const intersectionRight = findIntersection(lineBall, lineBoardRight);
+    // const boardMaxX = boardWidth - borderSize;
+    // const lineBoardRight = [[boardMaxX, 0], [boardMaxX, boardHeight]];
+    // const intersectionRight = findIntersection(lineBall, lineBoardRight);
 
+    // Keep this!
     const lineBoardTop = [[0, borderSize], [boardWidth, borderSize]];
     const intersectionTop = findIntersection(lineBall, lineBoardTop);
 
-    if (intersectionLeft != null) {
-        switch (ballDirection) {
-            case "upLeft": 
-                ballDirection = "upRight";
-                break;
-            case "downLeft": 
-                ballDirection = "downRight";
-                break;
-        }
-        ballX = intersectionLeft[0] + 1;
-        ballY = intersectionLeft[1];
+    const lineBoardBottom = [[0, boardHeight], [boardWidth, boardHeight]];
+    const intersectionBottom = findIntersection(lineBall, lineBoardBottom);
+    // if (intersectionLeft != null) {
+    //     switch (ballDirection) {
+    //         case "upLeft": 
+    //             ballDirection = "upRight";
+    //             break;
+    //         case "downLeft": 
+    //             ballDirection = "downRight";
+    //             break;
+    //     }
+    //     ballX = intersectionLeft[0] + 1;
+    //     ballY = intersectionLeft[1];
 
-    } else if (intersectionRight != null) {
+    // } else if (intersectionRight != null) {
 
-        switch (ballDirection) {
-            case "upRight": 
-                ballDirection = "upLeft";
-                break;
-            case "downRight": 
-                ballDirection = "downLeft";
-                break;
-        }
-        ballX = intersectionRight[0] - 1;
-        ballY = intersectionRight[1];
-
-    } else if (intersectionTop != null) {
-
+    //     switch (ballDirection) {
+    //         case "upRight": 
+    //             ballDirection = "upLeft";
+    //             break;
+    //         case "downRight": 
+    //             ballDirection = "downLeft";
+    //             break;
+    //     }
+    //     ballX = intersectionRight[0] - 1;
+    //     ballY = intersectionRight[1];
+    if (intersectionTop != null) {
+        console.log(intersectionTop,"top",lineBall,lineBoardTop);
         switch (ballDirection) {
             case "upRight": 
                 ballDirection = "downRight"; 
@@ -138,9 +142,21 @@ function run(fps) {
         }
         ballX = intersectionTop[0];
         ballY = intersectionTop[1] + 1;
-
+    }else if( intersectionBottom !=null){
+        console.log(intersectionBottom,"bottom");
+        switch (ballDirection) {
+            case "downRight": 
+                ballDirection = "upRight"; 
+                break;
+            case "downLeft": 
+                ballDirection = "upLeft"; 
+                break;
+        }
+        ballX = intersectionBottom[0];
+        ballY = intersectionBottom[1] - 1;
+    
     } else {
-        if (ballNextY > boardHeight) {
+        if (ballNextX > boardWidth || ballNextX < 0) {
             gameStatus = "gameOver";
         } else {
             ballX = ballNextX;
@@ -152,6 +168,9 @@ function run(fps) {
     const linePlayer = [[playerX - playerHalf, playerY], [playerX + playerHalf, playerY]];
     const intersectionPlayer = findIntersection(lineBall, linePlayer);
 
+    const linePlayer2 = [[player2X - playerHalf, player2Y], [player2X + playerHalf, player2Y]];
+    const intersectionPlayer2 = findIntersection(lineBall, linePlayer2);
+
     if (intersectionPlayer != null) {
 
         switch (ballDirection) {
@@ -161,20 +180,46 @@ function run(fps) {
             case "downLeft": 
                 ballDirection = "upLeft";
                 break;
+            case "upRight": 
+                ballDirection = "downRight";
+                break;
+            case "upLeft": 
+                ballDirection = "downLeft";
+                break;
         }
         ballX = intersectionPlayer[0];
         ballY = intersectionPlayer[1] - 1;
         playerPoints = playerPoints + 1;
         ballSpeed = ballSpeed + ballSpeedIncrement;
         playerSpeed = playerSpeed + playerSpeedIncrement;
+    }else if(intersectionPlayer2 != null){
+        switch (ballDirection) {
+            case "downRight": 
+                ballDirection = "upRight";
+                break;
+            case "downLeft": 
+                ballDirection = "upLeft";
+                break;
+            case "upRight": 
+                ballDirection = "downRight";
+                break;
+            case "upLeft": 
+                ballDirection = "downLeft";
+                break;
+        }
+        ballX = intersectionPlayer2[0];
+        ballY = intersectionPlayer2[1] - 1;
+        playerPoints2 = playerPoints2 + 1;
+        ballSpeed = ballSpeed + ballSpeedIncrement;
+        playerSpeed = playerSpeed + playerSpeedIncrement;
     }
 
     // Set player Y position
-    playerY = 600 - playerHeight - 10;
+    // playerY = 600 - playerHeight - 10; // TODO change!!!!!
 }
 
 function findIntersection(lineA, lineB) {
-    result = 0.00;
+    result = [0,0];
 
     const aX0 = lineA[0][0];
     const aY0 = lineA[0][1];
@@ -237,4 +282,4 @@ function findIntersection(lineA, lineB) {
 
     return result;
 }
-module.exports={run}
+module.exports={run,playerX,player2X,player2Y,playerY,playerPoints,playerPoints2,ballX,ballY}

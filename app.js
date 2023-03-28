@@ -138,7 +138,7 @@ async function private(obj) {
   });
 }
 
-const TARGET_FPS = 30;
+const TARGET_FPS = 60;
 const TARGET_MS = 1000 / TARGET_FPS;
 let frameCount = 0;
 let fpsStartTime = Date.now();
@@ -147,13 +147,18 @@ let currentFPS = 0;
 function gameLoop() {
   const startTime = Date.now();
 
-  if (currentFPS >= 1) {
-    // Podeu treure la següent línia per millorar el rendiment
-    console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
-    // Cridar aquí la funció que actualitza el joc (segons currentFPS)
-    // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
-    if (socketsClients.has("pl1")) {
-      if (socketsClients.has("pl2")) {
+   if (currentFPS >= 1) {
+       // Podeu treure la següent línia per millorar el rendiment
+      //  console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
+       // Cridar aquí la funció que actualitza el joc (segons currentFPS)
+       // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
+       if(socketsClients.has("pl1")){
+        if(socketsClients.has("pl2")){
+          // if the players are online the game starts
+          utils.run(currentFPS.toFixed(2))
+          // TODO broadcaste neccesary info for the game
+          
+        }
       }
     }
     // if the players are online the game starts
