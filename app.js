@@ -147,26 +147,24 @@ let currentFPS = 0;
 function gameLoop() {
   const startTime = Date.now();
 
-   if (currentFPS >= 1) {
-       // Podeu treure la següent línia per millorar el rendiment
-      //  console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
-       // Cridar aquí la funció que actualitza el joc (segons currentFPS)
-       // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
-       if(socketsClients.has("pl1")){
-        if(socketsClients.has("pl2")){
-          // if the players are online the game starts
-          utils.run(currentFPS.toFixed(2))
-          // TODO broadcaste neccesary info for the game
-          
-        }
+  if (currentFPS >= 1) {
+    // Podeu treure la següent línia per millorar el rendiment
+    //  console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
+    // Cridar aquí la funció que actualitza el joc (segons currentFPS)
+    // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
+    if (socketsClients.has("pl1")) {
+      utils.run(currentFPS.toFixed(2));
+      if (socketsClients.has("pl2")) {
+        // if the players are online the game starts
+        utils.run(currentFPS.toFixed(2));
+        // TODO broadcaste neccesary info for the game
       }
     }
-    // if the players are online the game starts
-    var rst = { type: "gameData", player1X: utils.playerX, player1Y: utils.playerY, player2X: utils.player2X, player2Y: utils.player2Y, ballX: utils.ballX, ballY: utils.ballY, };
-    console.log(rst)
-    // TODO broadcaste neccesary info for the game
-    broadcast(rst);
+    broadcast(utils.getRst());
   }
+  // if the players are online the game starts
+  // TODO broadcaste neccesary info for the game
+
 
   const endTime = Date.now();
   const elapsedTime = endTime - startTime;

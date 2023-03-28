@@ -1,15 +1,15 @@
 // TODO implement player 2
 var borderSize = 5;
 var playerPoints = 0;
-var playerX = Number.POSITIVE_INFINITY;
-var playerY = Number.POSITIVE_INFINITY;
+var playerX = 80;
+var playerY = 300;
 
 var gameStatus="running"
 
 //variables player 2 not tested
 var playerPoints2 = 0;
-var player2X = Number.POSITIVE_INFINITY;
-var player2Y = Number.POSITIVE_INFINITY;
+var player2X = 720;
+var player2Y = 300;
 var playerDirection2="none";
 // end variables player2
 
@@ -282,4 +282,8 @@ function findIntersection(lineA, lineB) {
 
     return result;
 }
-module.exports={run,playerX,player2X,player2Y,playerY,playerPoints,playerPoints2,ballX,ballY}
+
+function getRst() {
+    return {type: "gameData", playerX: playerX, player2X: player2X, player2Y: player2Y, playerY: playerY, playerPoints: playerPoints, playerPoints2: playerPoints2, ballX: ballX, ballY: ballY}
+}
+module.exports={run, getRst}
