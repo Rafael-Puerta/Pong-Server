@@ -282,4 +282,4 @@ function findIntersection(lineA, lineB) {
 
     return result;
 }
-module.exports={run}
+module.exports={run,playerX,player2X,player2Y,playerY,playerPoints,playerPoints2,ballX,ballY}
