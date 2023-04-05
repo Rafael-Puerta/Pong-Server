@@ -40,10 +40,13 @@ wss.on("connection", (ws) => {
       ws.close();
     } else {
       socketsClients.set("pl2", ws);
+      ws.send(JSON.stringify({ type: "setPlayer", player: 2 }))
       //TODO start game
     }
   } else {
     socketsClients.set("pl1", ws);
+    ws.send(JSON.stringify({ type: "setPlayer", player: 1 }))
+    console.log("pl1")
   }
   var rst = { type: "connectionTest", message: "OK" };
   ws.send(JSON.stringify(rst));
@@ -62,6 +65,7 @@ wss.on("connection", (ws) => {
       }
       if (socketsClients.get("pl1").ws == ws) {
         socketsClients.delete("pl1");
+
       }
     }
   });
@@ -95,6 +99,8 @@ wss.on("connection", (ws) => {
         message: messageAsObject.message,
       };
       private(rst);
+    } else if (messageAsObject.type == "playerDirection") {
+      utils.updateDirection(messageAsObject.player, messageAsObject.direction)
     }
   });
 });
