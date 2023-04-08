@@ -74,13 +74,11 @@ wss.on("connection", (ws) => {
   ws.on("message", (bufferedMessage) => {
     var messageAsString = bufferedMessage.toString();
     var messageAsObject = {};
-
     try {
       messageAsObject = JSON.parse(messageAsString);
     } catch (e) {
       console.log("Could not parse bufferedMessage from WS message");
     }
-
     if (messageAsObject.type == "bounce") {
       var rst = { type: "bounce", message: messageAsObject.message };
       ws.send(JSON.stringify(rst));
@@ -101,6 +99,9 @@ wss.on("connection", (ws) => {
       private(rst);
     } else if (messageAsObject.type == "playerDirection") {
       utils.updateDirection(messageAsObject.player, messageAsObject.direction)
+    } else if (messageAsObject.type == "kickBall") {
+      console.log(messageAsObject)
+      utils.kickBall(messageAsObject.player)
     }
   });
 });
@@ -159,14 +160,13 @@ function gameLoop() {
     // Cridar aquí la funció que actualitza el joc (segons currentFPS)
     // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
     if (socketsClients.has("pl1")) {
-      utils.run(currentFPS.toFixed(2));
       if (socketsClients.has("pl2")) {
         // if the players are online the game starts
         utils.run(currentFPS.toFixed(2));
+        broadcast(utils.getRst());
         // TODO broadcaste neccesary info for the game
       }
     }
-    broadcast(utils.getRst());
   }
   // if the players are online the game starts
   // TODO broadcaste neccesary info for the game

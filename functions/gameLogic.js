@@ -28,9 +28,17 @@ var ballSpeed = 200;
 var ballSpeedIncrement = 25;
 var ballDirection = "downRight";
 
+var roundStarted = false;
+
+var startingPlayer = 1;
+
+var currentMessage = "Player 1 press SPACE to kick the ball";
+
 function run(fps) {
 
     if (fps < 1) return;
+
+    if (!roundStarted) return;
 
     const boardWidth = 800;
     const boardHeight = 600;
@@ -164,8 +172,32 @@ function run(fps) {
         ballY = intersectionBottom[1] - 1;
     
     } else {
-        if (ballNextX > boardWidth || ballNextX < 0) {
-            gameStatus = "gameOver";
+        if (ballNextX > boardWidth) {
+            ballX = 400;
+            ballY = 300;
+            player2Y = 300;
+            playerY = 300;
+            playerPoints++
+            startingPlayer = 2;
+            roundStarted = false;
+            if (playerPoints == 5) {
+                currentMessage = "Player 1 wins! \nPlayer 2 press SPACE to start a new game"
+            } else {
+                currentMessage = "Player 2 press SPACE to kick the ball"
+            }
+        } else if (ballNextX < 0) {
+            ballX = 400;
+            ballY = 300; 
+            player2Y = 300;
+            playerY = 300;
+            playerPoints2++
+            startingPlayer = 1;
+            roundStarted = false;
+            if (playerPoints2 == 5) {
+                currentMessage = "Player 2 wins! \nPlayer 1 press SPACE to start a new game"
+            } else {
+                currentMessage = "Player 1 press SPACE to kick the ball"
+            }
         } else {
             ballX = ballNextX;
             ballY = ballNextY;
@@ -176,7 +208,7 @@ function run(fps) {
     const linePlayer = [[playerX, playerY - playerHalf], [playerX, playerY + playerHalf]];
     const intersectionPlayer = findIntersection(lineBall, linePlayer);
 
-    const linePlayer2 = [[player2X, player2Y - playerHalf], [player2X, player2Y + playerHalf]];
+    const linePlayer2 = [[player2X, player2Y + playerHalf], [player2X, player2Y - playerHalf]];
     const intersectionPlayer2 = findIntersection(lineBall, linePlayer2);
 
     if (intersectionPlayer != null) {
@@ -189,9 +221,8 @@ function run(fps) {
                 ballDirection = "upRight";
                 break;
         }
-        ballX = intersectionPlayer[0] - 1;
+        ballX = intersectionPlayer[0] + 1;
         ballY = intersectionPlayer[1];
-        playerPoints = playerPoints + 1;
         ballSpeed = ballSpeed + ballSpeedIncrement;
         playerSpeed = playerSpeed + playerSpeedIncrement;
     } else if(intersectionPlayer2 != null){
@@ -205,15 +236,12 @@ function run(fps) {
         }
         ballX = intersectionPlayer2[0] - 1;
         ballY = intersectionPlayer2[1];
-        playerPoints2 = playerPoints2 + 1;
         ballSpeed = ballSpeed + ballSpeedIncrement;
         playerSpeed = playerSpeed + playerSpeedIncrement;
     }
 
     // Set player Y position
     // playerY = 600 - playerHeight - 10; // TODO change!!!!!
-
-    //console.log(intersectionPlayer, intersectionPlayer2)
 }
 
 function findIntersection(lineA, lineB) {
@@ -281,7 +309,7 @@ function findIntersection(lineA, lineB) {
 }
 
 function getRst() {
-    return {type: "gameData", playerX: playerX, player2X: player2X, player2Y: player2Y, playerY: playerY, playerPoints: playerPoints, playerPoints2: playerPoints2, ballX: ballX, ballY: ballY}
+    return {type: "gameData", playerX: playerX, player2X: player2X, player2Y: player2Y, playerY: playerY, playerPoints: playerPoints, playerPoints2: playerPoints2, ballX: ballX, ballY: ballY, currentMessage: currentMessage}
 }
 
 function updateDirection(player, state) {
@@ -291,4 +319,32 @@ function updateDirection(player, state) {
         playerDirection2 = state
     }
 }
-module.exports={run, getRst, updateDirection}
+
+function kickBall(player) {
+    if (player == startingPlayer && startingPlayer == 1 && !roundStarted) {
+        if (playerPoints == 5 || playerPoints2 == 5) {
+            playerPoints = 0
+            playerPoints2 = 0
+        }
+        if (Math.round(Math.random()) == 1) {
+            ballDirection = "downRight"
+        } else {
+            ballDirection = "upRight"
+        }
+        currentMessage = ""
+        roundStarted = true
+    } else if (player == startingPlayer && startingPlayer == 2 && !roundStarted) {
+        if (playerPoints == 5 || playerPoints2 == 5) {
+            playerPoints = 0
+            playerPoints2 = 0
+        }
+        if (Math.round(Math.random()) == 1) {
+            ballDirection = "downLeft"
+        } else {
+            ballDirection = "upLeft"
+        }
+        currentMessage = ""
+        roundStarted = true
+    }
+}
+module.exports = {run, getRst, updateDirection, kickBall}
