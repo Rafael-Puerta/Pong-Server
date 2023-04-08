@@ -57,17 +57,9 @@ wss.on("connection", (ws) => {
 
   // What to do when a client is disconnected
   ws.on("close", () => {
-    if (socketsClients.has("pl1")) {
-      if (socketsClients.has("pl2")) {
-        if (socketsClients.get("pl2").ws == ws) {
-          socketsClients.delete("pl2");
-        }
-      }
-      if (socketsClients.get("pl1").ws == ws) {
-        socketsClients.delete("pl1");
-
-      }
-    }
+    socketsClients.delete("pl1")
+    socketsClients.delete("pl2")
+    broadcast({type: "disconnected"})
   });
 
   // What to do when a client message is received
@@ -102,6 +94,7 @@ wss.on("connection", (ws) => {
     } else if (messageAsObject.type == "kickBall") {
       console.log(messageAsObject)
       utils.kickBall(messageAsObject.player)
+    } else if (messageAsObject.type == "disconnectPlayer") {
     }
   });
 });

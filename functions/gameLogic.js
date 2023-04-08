@@ -34,6 +34,7 @@ var startingPlayer = 1;
 
 var currentMessage = "Player 1 press SPACE to kick the ball";
 
+
 function run(fps) {
 
     if (fps < 1) return;
