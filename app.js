@@ -92,28 +92,18 @@ wss.on("connection", (ws) => {
       console.log(messageAsObject)
       utils.kickBall(messageAsObject.player)
     } else if (messageAsObject.type == "disconnectPlayer") {
+      utils.setPlayerName(1, "")
+      utils.setPlayerName(2, "")
       utils.reset()
       socketsClients.delete("pl1")
       socketsClients.delete("pl2")
       broadcast({ type: "disconnect" })
+    } else if (messageAsObject.type == "setPlayerName") {
+      console.log(messageAsObject.player, messageAsObject.name)
+      utils.setPlayerName(messageAsObject.player, messageAsObject.name)
     }
   });
 });
-
-// Send clientsIds to everyone
-// function sendClients () {
-//   var clients = []
-//   socketsClients.forEach((value, key) => {
-//     clients.push(value.id)
-//   })
-//   wss.clients.forEach((client) => {
-//     if (client.readyState === WebSocket.OPEN) {
-//       var id = socketsClients.get(client).id
-//       var messageAsString = JSON.stringify({ type: "clients", id: id, list: clients })
-//       client.send(messageAsString)
-//     }
-//   })
-// }
 
 // Send a message to all websocket clients
 async function broadcast(obj) {
@@ -149,22 +139,14 @@ function gameLoop() {
   const startTime = Date.now();
 
   if (currentFPS >= 1) {
-    // Podeu treure la següent línia per millorar el rendiment
-    //  console.log(`FPS actual: ${currentFPS.toFixed(2)}`);
-    // Cridar aquí la funció que actualitza el joc (segons currentFPS)
-    // Cridar aquí la funció que fa un broadcast amb les dades del joc a tots els clients
     if (socketsClients.has("pl1")) {
       if (socketsClients.has("pl2")) {
         // if the players are online the game starts
         utils.run(currentFPS.toFixed(2));
         broadcast(utils.getRst());
-        // TODO broadcaste neccesary info for the game
       }
     }
   }
-  // if the players are online the game starts
-  // TODO broadcaste neccesary info for the game
-
 
   const endTime = Date.now();
   const elapsedTime = endTime - startTime;
