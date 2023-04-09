@@ -57,9 +57,6 @@ wss.on("connection", (ws) => {
 
   // What to do when a client is disconnected
   ws.on("close", () => {
-    socketsClients.delete("pl1")
-    socketsClients.delete("pl2")
-    broadcast({type: "disconnected"})
   });
 
   // What to do when a client message is received
@@ -95,6 +92,9 @@ wss.on("connection", (ws) => {
       console.log(messageAsObject)
       utils.kickBall(messageAsObject.player)
     } else if (messageAsObject.type == "disconnectPlayer") {
+      socketsClients.delete("pl1")
+      socketsClients.delete("pl2")
+      broadcast({ type: "disconnect" })
     }
   });
 });
@@ -176,7 +176,9 @@ function gameLoop() {
     frameCount = 0;
     fpsStartTime = endTime;
   }
-  setTimeout(() => {
-    setImmediate(gameLoop);
-  }, remainingTime);
+  if (socketsClients.has("pl1") && socketsClients.has("pl2")) {
+    setTimeout(() => {
+      setImmediate(gameLoop);
+    }, remainingTime);
+  }
 }
