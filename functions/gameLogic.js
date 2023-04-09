@@ -4,13 +4,13 @@ var playerPoints = 0;
 var playerX = 80;
 var playerY = 300;
 
-var gameStatus="running"
+var gameStatus = "running"
 
 //variables player 2 not tested
 var playerPoints2 = 0;
 var player2X = 720;
 var player2Y = 300;
-var playerDirection2="none";
+var playerDirection2 = "none";
 // end variables player2
 
 var playerWidth = 5; // use for the 2 players
@@ -30,9 +30,15 @@ var ballDirection = "downRight";
 
 var roundStarted = false;
 
-var startingPlayer = 1;
-
-var currentMessage = "Player 1 press SPACE to kick the ball";
+var startingPlayer;
+var currentMessage;
+if (Math.round(Math.random()) == 1) {
+    startingPlayer = 1;
+    currentMessage = "Player 1 press SPACE to kick the ball";
+} else {
+    startingPlayer = 2;
+    currentMessage = "Player 2 press SPACE to kick the ball";
+}
 
 
 function run(fps) {
@@ -43,11 +49,11 @@ function run(fps) {
 
     const boardWidth = 800;
     const boardHeight = 600;
-    
+
     // Move player MODIFIED
     switch (playerDirection) {
         case "down":
-            playerY = playerY + playerSpeed / fps; 
+            playerY = playerY + playerSpeed / fps;
             break;
         case "up":
             playerY = playerY - playerSpeed / fps;
@@ -55,7 +61,7 @@ function run(fps) {
     }
     switch (playerDirection2) {
         case "down":
-            player2Y = player2Y + playerSpeed / fps; 
+            player2Y = player2Y + playerSpeed / fps;
             break;
         case "up":
             player2Y = player2Y - playerSpeed / fps;
@@ -74,7 +80,7 @@ function run(fps) {
 
         playerY = playerMaxY;
     }
-    
+
     if (player2Y < playerMinY) {
 
         player2Y = playerMinY;
@@ -88,19 +94,19 @@ function run(fps) {
     let ballNextX = ballX;
     let ballNextY = ballY;
     switch (ballDirection) {
-        case "upRight": 
+        case "upRight":
             ballNextX = ballX + ballSpeed / fps;
             ballNextY = ballY - ballSpeed / fps;
             break;
-        case "upLeft": 
+        case "upLeft":
             ballNextX = ballX - ballSpeed / fps;
             ballNextY = ballY - ballSpeed / fps;
             break;
-        case "downRight": 
+        case "downRight":
             ballNextX = ballX + ballSpeed / fps;
             ballNextY = ballY + ballSpeed / fps;
             break;
-        case "downLeft": 
+        case "downLeft":
             ballNextX = ballX - ballSpeed / fps;
             ballNextY = ballY + ballSpeed / fps;
             break;
@@ -148,30 +154,30 @@ function run(fps) {
     //     ballX = intersectionRight[0] - 1;
     //     ballY = intersectionRight[1];
     if (intersectionTop != null) {
-        console.log(intersectionTop,"top",lineBall,lineBoardTop);
+        console.log(intersectionTop, "top", lineBall, lineBoardTop);
         switch (ballDirection) {
-            case "upRight": 
-                ballDirection = "downRight"; 
+            case "upRight":
+                ballDirection = "downRight";
                 break;
-            case "upLeft": 
-                ballDirection = "downLeft"; 
+            case "upLeft":
+                ballDirection = "downLeft";
                 break;
         }
         ballX = intersectionTop[0];
         ballY = intersectionTop[1] + 1;
-    }else if( intersectionBottom !=null){
-        console.log(intersectionBottom,"bottom");
+    } else if (intersectionBottom != null) {
+        console.log(intersectionBottom, "bottom");
         switch (ballDirection) {
-            case "downRight": 
-                ballDirection = "upRight"; 
+            case "downRight":
+                ballDirection = "upRight";
                 break;
-            case "downLeft": 
-                ballDirection = "upLeft"; 
+            case "downLeft":
+                ballDirection = "upLeft";
                 break;
         }
         ballX = intersectionBottom[0];
         ballY = intersectionBottom[1] - 1;
-    
+
     } else {
         if (ballNextX > boardWidth) {
             ballX = 400;
@@ -188,7 +194,7 @@ function run(fps) {
             }
         } else if (ballNextX < 0) {
             ballX = 400;
-            ballY = 300; 
+            ballY = 300;
             player2Y = 300;
             playerY = 300;
             playerPoints2++
@@ -215,10 +221,10 @@ function run(fps) {
     if (intersectionPlayer != null) {
 
         switch (ballDirection) {
-            case "downLeft": 
+            case "downLeft":
                 ballDirection = "downRight";
                 break;
-            case "upLeft": 
+            case "upLeft":
                 ballDirection = "upRight";
                 break;
         }
@@ -226,12 +232,12 @@ function run(fps) {
         ballY = intersectionPlayer[1];
         ballSpeed = ballSpeed + ballSpeedIncrement;
         playerSpeed = playerSpeed + playerSpeedIncrement;
-    } else if(intersectionPlayer2 != null){
+    } else if (intersectionPlayer2 != null) {
         switch (ballDirection) {
-            case "downRight": 
+            case "downRight":
                 ballDirection = "downLeft";
                 break;
-            case "upRight": 
+            case "upRight":
                 ballDirection = "upLeft";
                 break;
         }
@@ -246,7 +252,7 @@ function run(fps) {
 }
 
 function findIntersection(lineA, lineB) {
-    result = [0,0];
+    result = [0, 0];
 
     const aX0 = lineA[0][0];
     const aY0 = lineA[0][1];
@@ -281,7 +287,7 @@ function findIntersection(lineA, lineB) {
         const bB = bY0 - bM * bX0;
 
         const tolerance = 1e-5;
-        if (Math.abs(aM - bM) < tolerance) { 
+        if (Math.abs(aM - bM) < tolerance) {
             return null;
         }
 
@@ -292,13 +298,13 @@ function findIntersection(lineA, lineB) {
     // Check if the intersection point is within the bounding boxes of both line segments
     const boundingBoxTolerance = 1e-5;
     const withinA = x >= Math.min(aX0, aX1) - boundingBoxTolerance &&
-                            x <= Math.max(aX0, aX1) + boundingBoxTolerance &&
-                            y >= Math.min(aY0, aY1) - boundingBoxTolerance &&
-                            y <= Math.max(aY0, aY1) + boundingBoxTolerance;
+        x <= Math.max(aX0, aX1) + boundingBoxTolerance &&
+        y >= Math.min(aY0, aY1) - boundingBoxTolerance &&
+        y <= Math.max(aY0, aY1) + boundingBoxTolerance;
     const withinB = x >= Math.min(bX0, bX1) - boundingBoxTolerance &&
-                            x <= Math.max(bX0, bX1) + boundingBoxTolerance &&
-                            y >= Math.min(bY0, bY1) - boundingBoxTolerance &&
-                            y <= Math.max(bY0, bY1) + boundingBoxTolerance;
+        x <= Math.max(bX0, bX1) + boundingBoxTolerance &&
+        y >= Math.min(bY0, bY1) - boundingBoxTolerance &&
+        y <= Math.max(bY0, bY1) + boundingBoxTolerance;
 
     if (withinA && withinB) {
         result[0] = x;
@@ -310,12 +316,12 @@ function findIntersection(lineA, lineB) {
 }
 
 function getRst() {
-    return {type: "gameData", playerX: playerX, player2X: player2X, player2Y: player2Y, playerY: playerY, playerPoints: playerPoints, playerPoints2: playerPoints2, ballX: ballX, ballY: ballY, currentMessage: currentMessage}
+    return { type: "gameData", playerX: playerX, player2X: player2X, player2Y: player2Y, playerY: playerY, playerPoints: playerPoints, playerPoints2: playerPoints2, ballX: ballX, ballY: ballY, currentMessage: currentMessage }
 }
 
 function updateDirection(player, state) {
     if (player == "1") {
-        playerDirection = state 
+        playerDirection = state
     } else if (player == "2") {
         playerDirection2 = state
     }
@@ -348,4 +354,20 @@ function kickBall(player) {
         roundStarted = true
     }
 }
-module.exports = {run, getRst, updateDirection, kickBall}
+
+function reset() {
+    if (Math.round(Math.random()) == 1) {
+        startingPlayer = 1;
+        currentMessage = "Player 1 press SPACE to kick the ball";
+    } else {
+        startingPlayer = 2;
+        currentMessage = "Player 2 press SPACE to kick the ball";
+    }
+    ballX = 400;
+    ballY = 300;
+    player2Y = 300;
+    playerY = 300;
+    playerPoints = 0
+    playerPoints2 = 0
+}
+module.exports = { run, getRst, updateDirection, kickBall, reset }

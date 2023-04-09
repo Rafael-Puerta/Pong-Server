@@ -92,6 +92,7 @@ wss.on("connection", (ws) => {
       console.log(messageAsObject)
       utils.kickBall(messageAsObject.player)
     } else if (messageAsObject.type == "disconnectPlayer") {
+      utils.reset()
       socketsClients.delete("pl1")
       socketsClients.delete("pl2")
       broadcast({ type: "disconnect" })
