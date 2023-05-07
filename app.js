@@ -4,6 +4,7 @@ const url = require("url");
 const post = require("./post.js");
 const { v4: uuidv4 } = require("uuid");
 const utils = require("./functions/gameLogic.js");
+const utilsdb=require('./functions/dbUtils.js');
 
 // Wait 'ms' milliseconds
 function wait(ms) {
@@ -40,11 +41,13 @@ wss.on("connection", (ws) => {
       ws.close();
     } else {
       socketsClients.set("pl2", ws);
+      socketsClients.set( ws,2);
       ws.send(JSON.stringify({ type: "setPlayer", player: 2 }))
       //TODO start game
     }
   } else {
     socketsClients.set("pl1", ws);
+    socketsClients.set( ws,1);
     ws.send(JSON.stringify({ type: "setPlayer", player: 1 }))
     console.log("pl1")
   }
@@ -97,10 +100,40 @@ wss.on("connection", (ws) => {
       utils.reset()
       socketsClients.delete("pl1")
       socketsClients.delete("pl2")
+      socketsClients.delete(ws)
       broadcast({ type: "disconnect" })
-    } else if (messageAsObject.type == "setPlayerName") {
-      console.log(messageAsObject.player, messageAsObject.name)
-      utils.setPlayerName(messageAsObject.player, messageAsObject.name)
+    // }
+    //  else if (messageAsObject.type == "setPlayerName") {
+    //   console.log(messageAsObject.player, messageAsObject.name)
+    //   utils.setPlayerName(messageAsObject.player, messageAsObject.name)
+    }else if (messageAsObject.type == "login") {
+      if(messageAsObject.user && messageAsObject.password){
+        let result=utilsdb.login(messageAsObject.user,messageAsObject.password,socketsClients.get(ws));
+        if(result){
+          var rst = { type: "login", message: 'OK' };
+          ws.send(JSON.stringify(rst));
+        }else{
+          var rst = { type: "login", message: 'KO' };
+          ws.send(JSON.stringify(rst));
+        }
+      }else{
+        var rst = { type: "login", message: 'KO' };
+          ws.send(JSON.stringify(rst));
+      }
+    }else if (messageAsObject.type == "singup") {
+      if(messageAsObject.user && messageAsObject.password && messageAsObject.color){
+        let result=utilsdb.singup(messageAsObject.user,messageAsObject.password,messageAsObject.color,socketsClients.get(ws))
+        if(result){
+          var rst = { type: "signup", message: 'OK' };
+          ws.send(JSON.stringify(rst));
+        }else{
+          var rst = { type: "signup", message: 'KO' };
+          ws.send(JSON.stringify(rst));
+        }
+      }else{
+        var rst = { type: "signup", message: 'KO' };
+        ws.send(JSON.stringify(rst));
+      }
     }
   });
 });
@@ -136,12 +169,16 @@ let fpsStartTime = Date.now();
 let currentFPS = 0;
 
 function gameLoop() {
+  
   const startTime = Date.now();
-
+  
   if (currentFPS >= 1) {
     if (socketsClients.has("pl1")) {
       if (socketsClients.has("pl2")) {
         // if the players are online the game starts
+        if(!utilsdb.startGame){
+          utilsdb.startGame=Date.now();
+        }
         utils.run(currentFPS.toFixed(2));
         broadcast(utils.getRst());
       }

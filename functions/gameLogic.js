@@ -4,6 +4,8 @@ var playerPoints = 0;
 var playerX = 80;
 var playerY = 300;
 
+const utilsdb=require('./dbUtils')
+
 var gameStatus = "running"
 
 //variables player 2 not tested
@@ -168,6 +170,8 @@ function run(fps) {
             if (playerPoints == 5) {
                 currentMessage = `${playerName1} wins! \n${playerName2} press SPACE to start a new game`
                 currentSound = "win"
+                // HERE DB INSERT
+                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2);
             } else {
                 currentMessage = `${playerName2} press SPACE to kick the ball`
             }
@@ -183,6 +187,8 @@ function run(fps) {
             if (playerPoints2 == 5) {
                 currentMessage = `${playerName2} wins! \n${playerName1} press SPACE to start a new game`
                 currentSound = "win"
+                // DB INSERT
+                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2);
             } else {
                 currentMessage = `${playerName1} press SPACE to kick the ball`
             }
@@ -371,4 +377,4 @@ function setPlayerName(player, name) {
         reset()
     }
 }
-module.exports = { run, getRst, updateDirection, kickBall, reset, setPlayerName}
+module.exports = { run, getRst, updateDirection, kickBall, reset ,setPlayerName}
