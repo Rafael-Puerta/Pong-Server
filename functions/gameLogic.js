@@ -171,7 +171,7 @@ function run(fps) {
                 currentMessage = `${playerName1} wins! \n${playerName2} press SPACE to start a new game`
                 currentSound = "win"
                 // HERE DB INSERT
-                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2);
+                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2,1);
             } else {
                 currentMessage = `${playerName2} press SPACE to kick the ball`
             }
@@ -188,7 +188,7 @@ function run(fps) {
                 currentMessage = `${playerName2} wins! \n${playerName1} press SPACE to start a new game`
                 currentSound = "win"
                 // DB INSERT
-                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2);
+                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2,2);
             } else {
                 currentMessage = `${playerName1} press SPACE to kick the ball`
             }

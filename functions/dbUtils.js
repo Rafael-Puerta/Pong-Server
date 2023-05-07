@@ -65,14 +65,22 @@ async function singup(user,password,color,player){
     }
 }
 
-async function saveGame(player1,player2,hits1,hits2){
+async function saveGame(player1,player2,hits1,hits2,winner){
     let now=Date.now();
     let diff=(now.getTime() - startGame.getTime()) / 1000;
     try {
         let id1=await queryDatabase(`SELECT id FROM users WHERE name=${player1};`);
+        id1=id1[0]
         let id2=await queryDatabase(`SELECT id FROM users WHERE name=${player2};`);
+        id2=id2[0]
+        let win=0
+        if(winner==1){
+            win=id1
+        }else{
+            win=id2
+        }
         console.log(id1,id2);
-        await queryDatabase(`INSERT INTO games(time,duration,player1,player2,hitsPlayer1,hitsPlayer2) VALUES(${now},${diff},'${player1}','${player2}',${hits1},${hits2})`)
+        await queryDatabase(`INSERT INTO games(time,duration,player1,player2,hitsPlayer1,hitsPlayer2,winner) VALUES(${now},${diff},${id1},${id2},${hits1},${hits2},${win})`)
         startGame=null;
         // return true
     } catch (error) {
@@ -82,4 +90,13 @@ async function saveGame(player1,player2,hits1,hits2){
 
 }
 
-module.exports={login,singup,startGame,saveGame}
+async function stats(id){
+
+}
+
+async function playerList(){
+    let results=await queryDatabase('SELECT id,name FROM users')
+    return results;
+}
+
+module.exports={login,singup,startGame,saveGame,playerList,stats}
