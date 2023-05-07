@@ -35,11 +35,10 @@ function toLocalTime(time) {
     return n;
 };
 
-async function login(user,passwd,player){
+async function login(user,passwd){
     try {
         let exists=await queryDatabase(`SELECT * FROM users WHERE name='${user}' and password='${passwd}';`)
         if(exists.length>0){
-            logic.setPlayerName(player,user);
             return true;
         }else{
             return false;
