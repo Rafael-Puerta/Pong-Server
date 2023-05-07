@@ -109,6 +109,7 @@ wss.on("connection", (ws) => {
     }else if (messageAsObject.type == "login") {
       if(messageAsObject.user && messageAsObject.password){
         let result=utilsdb.login(messageAsObject.user,messageAsObject.password,socketsClients.get(ws));
+        console.log("player:",socketsClients.get(ws));
         if(result){
           var rst = { type: "login", message: 'OK' };
           ws.send(JSON.stringify(rst));

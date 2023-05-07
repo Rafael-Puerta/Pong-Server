@@ -377,4 +377,4 @@ function setPlayerName(player, name) {
         reset()
     }
 }
-module.exports = { run, getRst, updateDirection, kickBall, reset ,setPlayerName}
+module.exports = { run, getRst, updateDirection, kickBall, reset , setPlayerName }

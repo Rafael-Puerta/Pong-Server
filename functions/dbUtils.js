@@ -39,7 +39,7 @@ async function login(user,passwd,player){
     try {
         let exists=await queryDatabase(`SELECT * FROM users WHERE name='${user}' and password='${passwd}';`)
         if(exists.length>0){
-            logic.setPlayerName(player,user)
+            logic.setPlayerName(player,user);
             return true;
         }else{
             return false;
