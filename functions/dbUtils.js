@@ -1,4 +1,5 @@
 const logic=require('./gameLogic.js')
+const mysql=require('mysql2')
 
 let startGame
 
@@ -69,6 +70,9 @@ async function saveGame(player1,player2,hits1,hits2){
     let now=Date.now();
     let diff=(now.getTime() - startGame.getTime()) / 1000;
     try {
+        let id1=await queryDatabase(`SELECT id FROM users WHERE name=${player1};`);
+        let id2=await queryDatabase(`SELECT id FROM users WHERE name=${player2};`);
+        console.log(id1,id2);
         await queryDatabase(`INSERT INTO games(time,duration,player1,player2,hitsPlayer1,hitsPlayer2) VALUES(${now},${diff},'${player1}','${player2}',${hits1},${hits2})`)
         startGame=null;
         // return true
