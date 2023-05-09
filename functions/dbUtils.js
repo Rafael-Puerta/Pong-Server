@@ -90,8 +90,40 @@ async function saveGame(player1,player2,hits1,hits2,winner){
 
 }
 
-async function stats(id){
+async function list(){
+    try {
+        let results=await queryDatabase('SELECT * FROM users;');
+        return results;
+    } catch (error) {
+        return false;
+    }
+}
 
+async function stats(id){
+    try {
+        let exists=await queryDatabase(`SELECT * FROM users WHERE id=${user};`)
+        if(exists.length>0){
+
+            let wins=await queryDatabase(`SELECT COUNT(id) FROM games WHERE winner=${id}`)
+            let lose=await queryDatabase(`SELECT COUNT(id) FROM games WHERE winner<>${id} and player1=${id} or player2=${id};`)
+            let longest=await queryDatabase(`SELECT * FROM games WHERE player1=${id} or player2=${id} ORDER BY time DESC LIMIT 1;`)
+            let topHits1=await queryDatabase(`SELECT * FROM games WHERE player1=${id} ORDER BY hitsPlayer1 DESC LIMIT 1;`)
+            let topHits2=await queryDatabase(`SELECT * FROM games WHERE  player2=${id} ORDER BY hitsPlayer2 DESC LIMIT 1;`)
+            let toph=0
+            if(topHits1[0].hitsPlayer1>topHits2[0].hitsPlayer2){
+                toph=topHits1[0].hitsPlayer1
+            }else{
+                toph=topHits1[0].hitsPlayer2
+            }
+            let stat={wins:wins[0],loses:lose[0],long:longest[0],topHits:toph} // TODO test response, maybe need modify wins[0] to wins[0].count... others too
+            return stat;
+        }else{
+            return false;
+        }
+    } catch (error) {
+        console.log(error);
+        return false
+    }
 }
 
 async function playerList(){
@@ -99,4 +131,4 @@ async function playerList(){
     return results;
 }
 
-module.exports={login,singup,startGame,saveGame,playerList,stats}
+module.exports={login,singup,startGame,saveGame,playerList,stats,list}

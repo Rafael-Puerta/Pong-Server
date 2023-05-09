@@ -136,6 +136,22 @@ wss.on("connection", (ws) => {
         var rst = { type: "signup", message: 'KO' };
         ws.send(JSON.stringify(rst));
       }
+    }else if (messageAsObject.type == "listUsers") {
+      var rst = { type: "listUser", message: 'KO' };
+      let result=utilsdb.list();
+      if(result){
+        rst = { type: "listUser", message: 'OK' ,data:result};
+      }
+      ws.send(JSON.stringify(rst));
+    }else if (messageAsObject.type == "stats") {
+      var rst = { type: "stats", message: 'KO' };
+      if(messageAsObject.user){
+        let result=utilsdb.stats();
+        if(result){
+          rst = { type: "stats", message: 'OK' ,data:result};
+        }
+      }
+      ws.send(JSON.stringify(rst));
     }
   });
 });
