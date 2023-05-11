@@ -51,16 +51,19 @@ var playerReady2 = false;
 
 function run(fps) {
 
+    // If game hasn't started yet do nothing
     if (fps < 1) return;
 
+    // Reset sounds to avoid sfx repeating
     currentSound = ""
 
+    // If players are not ready or haven't kicked the ball do nothing
     if (!roundStarted || !player1Ready || !player2Ready) return;
 
     const boardWidth = 800;
     const boardHeight = 600;
 
-    // Move player MODIFIED
+    // Player movement
     switch (playerDirection) {
         case "down":
             playerY = playerY + playerSpeed / fps;
@@ -100,7 +103,7 @@ function run(fps) {
         player2Y = playerMaxY;
     }
 
-    // Move ball
+    // Ball movement
     let ballNextX = ballX;
     let ballNextY = ballY;
     switch (ballDirection) {
@@ -122,26 +125,16 @@ function run(fps) {
             break;
     }
 
-    // TODO maybe we can use this for the player 2?
-    // Check ball collision with board sides
+    // Render Hitboxes
     const lineBall = [[ballX, ballY], [ballNextX, ballNextY]];
-
-    // const lineBoardLeft = [[borderSize, 0], [borderSize, boardHeight]];
-    // const intersectionLeft = findIntersection(lineBall, lineBoardLeft);
-
-    // const boardMaxX = boardWidth - borderSize;
-    // const lineBoardRight = [[boardMaxX, 0], [boardMaxX, boardHeight]];
-    // const intersectionRight = findIntersection(lineBall, lineBoardRight);
-
-    // Keep this!
     const lineBoardTop = [[0, borderSize], [boardWidth, borderSize]];
     const intersectionTop = findIntersection(lineBall, lineBoardTop);
 
     const lineBoardBottom = [[0, boardHeight], [boardWidth, boardHeight]];
     const intersectionBottom = findIntersection(lineBall, lineBoardBottom);
     
+    // Check collision with board borders
     if (intersectionTop != null) {
-        console.log(intersectionTop, "top", lineBall, lineBoardTop);
         switch (ballDirection) {
             case "upRight":
                 ballDirection = "downRight";
@@ -153,7 +146,6 @@ function run(fps) {
         ballX = intersectionTop[0];
         ballY = intersectionTop[1] + 1;
     } else if (intersectionBottom != null) {
-        console.log(intersectionBottom, "bottom");
         switch (ballDirection) {
             case "downRight":
                 ballDirection = "upRight";
@@ -166,6 +158,7 @@ function run(fps) {
         ballY = intersectionBottom[1] - 1;
 
     } else {
+        // Check if ball is in any of the goal areas
         if (ballNextX > boardWidth) {
             ballX = 400;
             ballY = 300;
@@ -250,6 +243,7 @@ function run(fps) {
     // playerY = 600 - playerHeight - 10; // TODO change!!!!!
 }
 
+// Function for checking intersections
 function findIntersection(lineA, lineB) {
     result = [0, 0];
 
@@ -314,6 +308,7 @@ function findIntersection(lineA, lineB) {
     return result;
 }
 
+// Function to broadast the game data from main app
 function getRst() {
     return { 
         type: "gameData", 
@@ -333,6 +328,7 @@ function getRst() {
         playerColor2: playerColor2}
 }
 
+// Function to update players' movement state
 function updateDirection(player, state) {
     if (player == "1") {
         playerDirection = state
@@ -341,8 +337,10 @@ function updateDirection(player, state) {
     }
 }
 
+// Function to start moving the ball (and reset points if needed)
 function kickBall(player) {
     if (playerPoints == 0 && playerPoints2 == 0) {
+        // Sets game's starting time for calculating game duration
         utilsdb.setStartGame();
     }
     if (player == startingPlayer && startingPlayer == 1 && !roundStarted) {
@@ -374,6 +372,7 @@ function kickBall(player) {
     }
 }
 
+// Function to reset all objects' positions after a goal
 function reset() {
     roundStarted = false
     if (Math.round(Math.random()) == 1) {
@@ -396,6 +395,7 @@ function reset() {
 }
 
 function setPlayer(player, name, color) {
+    // Sets player data for broadcasting to clients
     if (player == 1) {
         playerName1 = name;
         playerColor1 = color;
@@ -405,8 +405,6 @@ function setPlayer(player, name, color) {
         playerColor2 = color;
         player2Ready = true;
     }
-    console.log("playerset1:", playerName1, playerColor1)
-    console.log("playerset2:", playerName2, playerColor2)
 
     if (playerName1 != "" && playerName2 != "") {
         reset()

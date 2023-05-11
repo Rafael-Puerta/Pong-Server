@@ -49,7 +49,6 @@ wss.on("connection", (ws) => {
     socketsClients.set("pl1", ws);
     socketsClients.set(ws, 1);
     ws.send(JSON.stringify({ type: "setPlayer", player: 1 }))
-    console.log("pl1")
   }
   var rst = { type: "connectionTest", message: "OK" };
   ws.send(JSON.stringify(rst));
@@ -89,11 +88,12 @@ wss.on("connection", (ws) => {
         message: messageAsObject.message,
       };
       private(rst);
+    // Update players' movement state
     } else if (messageAsObject.type == "playerDirection") {
       utils.updateDirection(messageAsObject.player, messageAsObject.direction)
     } else if (messageAsObject.type == "kickBall") {
-      console.log(messageAsObject)
       utils.kickBall(messageAsObject.player)
+    // Reset players data on disconnect
     } else if (messageAsObject.type == "disconnectPlayer") {
       utils.setPlayer(1, "", "")
       utils.setPlayer(2, "", "")
@@ -106,12 +106,12 @@ wss.on("connection", (ws) => {
       //  else if (messageAsObject.type == "setPlayerName") {
       //   console.log(messageAsObject.player, messageAsObject.name)
       //   utils.setPlayerName(messageAsObject.player, messageAsObject.name)
+
     } else if (messageAsObject.type == "login") {
       if (messageAsObject.user && messageAsObject.password) {
         utilsdb.login(messageAsObject.user, messageAsObject.password).then(
           (result) => {
             console.log("player:", socketsClients.get(ws));
-            console.log(result)
             if (result) {
               var rst = { type: "login", message: 'OK', name:result.name, color:result.color };
               ws.send(JSON.stringify(rst));
@@ -141,6 +141,8 @@ wss.on("connection", (ws) => {
         var rst = { type: "signup", message: 'KO' };
         ws.send(JSON.stringify(rst));
       }
+
+    // List all players
     } else if (messageAsObject.type == "listUsers") {
       var rst = { type: "listUser", message: 'KO' };
       utilsdb.list().then(
@@ -148,17 +150,20 @@ wss.on("connection", (ws) => {
           rst = { type: "listUser", message: 'OK', data: result };
           ws.send(JSON.stringify(rst));
         });
+
+    // get stats of a single player
     } else if (messageAsObject.type == "stats") {
       var rst = { type: "stats", message: 'KO' };
       if (messageAsObject.user) {
         utilsdb.stats(messageAsObject.user).then((result) => {
-          console.log("res: ",result != false)
           if (result) {
             rst = { type: "stats", message: 'OK', data: result };
           }
           ws.send(JSON.stringify(rst));
         })
       }
+
+    // Set player data in gameLogic
     } else if (messageAsObject.type == "playerReady") {
       var rst = { type: "playerReady", message: 'KO' };
       if (messageAsObject.player && messageAsObject.username && messageAsObject.color) {
@@ -200,6 +205,7 @@ let frameCount = 0;
 let fpsStartTime = Date.now();
 let currentFPS = 0;
 
+// function that executes gameLogic every server frame
 function gameLoop() {
 
   const startTime = new Date();

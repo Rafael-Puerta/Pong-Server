@@ -35,6 +35,8 @@ function toLocalTime(time) {
     return n;
 };
 
+// Function to check login credentials in db
+// Returns user data if correct, false otherwise
 async function login(user,passwd){
     try {
         let exists=await queryDatabase(`SELECT * FROM users WHERE name='${user}' and password='${passwd}';`)
@@ -49,6 +51,8 @@ async function login(user,passwd){
     }
 }
 
+// Function to sign up user
+// Returns user data if correct, false otherwise
 async function singup(user,password,color,player){
     try {
         let exists=await queryDatabase(`SELECT * FROM users WHERE name='${user}';`)
@@ -64,9 +68,10 @@ async function singup(user,password,color,player){
     }
 }
 
+// Function to save game data in db upon finishing
 async function saveGame(player1,player2,hits1,hits2,points1, points2, winner){
     let now=Date.now();
-    console.log(now- startGame)
+    // Calculates game duration with starting time and finish time
     let diff=Math.round((now - startGame) / 1000);
     let today = new Date();
     let dateString = today.getFullYear() + ":" + (today.getMonth() > 10 ? today.getMonth() : "0" + today.getMonth()) + ":" + (today.getDate() > 0 ? today.getDate() : "0"+ today.getDate()) ;
@@ -91,6 +96,7 @@ async function saveGame(player1,player2,hits1,hits2,points1, points2, winner){
 
 }
 
+// Function to get list of all users
 async function list(){
     try {
         let results=await queryDatabase('SELECT * FROM users;');
@@ -100,21 +106,25 @@ async function list(){
     }
 }
 
+// Function to get all data of a single player
 async function stats(id){
     try {
         let exists=await queryDatabase(`SELECT * FROM users WHERE id='${id}';`)
-        console.log("a " + exists)
         if(exists.length>0){
             let wins=await queryDatabase(`SELECT COUNT(id) as counter FROM games WHERE winner=${id}`)
             let lose=await queryDatabase(`SELECT COUNT(id) as counter FROM games WHERE winner<>${id} and player1=${id} or player2=${id};`)
             let longest=await queryDatabase(`SELECT * FROM games WHERE player1=${id} or player2=${id} ORDER BY duration DESC LIMIT 1;`)
+            // If longest game exists, get name of both players in said game
             if (longest.length != 0) {
                 let user1 = await queryDatabase(`SELECT * FROM users WHERE id = ${longest[0].player1}`);
                 let user2 = await queryDatabase(`SELECT * FROM users WHERE id = ${longest[0].player2}`);
                 longest[0].name1 = user1[0].name;
                 longest[0].name2 = user2[0].name
             }
+
+
             let topHits1=await queryDatabase(`SELECT * FROM games WHERE player1=${id} ORDER BY hitsPlayer1 DESC LIMIT 1;`)
+            // If query returns a game, get name of both players
             if (topHits1.length != 0)
             {
                 user1 = await queryDatabase(`SELECT * FROM users WHERE id = ${topHits1[0].player1}`);
@@ -122,19 +132,22 @@ async function stats(id){
                 topHits1[0].name1 = user1[0].name
                 topHits1[0].name2 = user2[0].name
             }
+
+
             let topHits2=await queryDatabase(`SELECT * FROM games WHERE  player2=${id} ORDER BY hitsPlayer2 DESC LIMIT 1;`)
+            // If query returns a game, get name of both players
             if (topHits2.length != 0) {
                 user1 = await queryDatabase(`SELECT * FROM users WHERE id = ${topHits2[0].player1}`);
                 user2 = await queryDatabase(`SELECT * FROM users WHERE id = ${topHits2[0].player2}`);
                 topHits2[0].name1 = user1[0].name
                 topHits2[0].name2 = user2[0].name
             }
-            let toph=0
-            console.log(topHits1)
-            console.log(topHits2)
             let stat;
+
+            // If player hasn't played a single game, return empty object
             if(wins[0].counter == 0 && lose[0].counter == 0) {
                 stat = {};
+            // Compare topHits1 and topHits2 to get the game with highest number of hits
             } else if (topHits1.length == 0) {
                 stat = {wins:wins[0].counter,loses:lose[0].counter,long:longest[0],topHits:topHits2[0].hitsPlayer2, topHitsGame: topHits2[0]}
             } else if (topHits2.length == 0) {
@@ -144,7 +157,6 @@ async function stats(id){
             }else{
                 stat = {wins:wins[0].counter,loses:lose[0].counter,long:longest[0],topHits:topHits2[0].hitsPlayer2, topHitsGame: topHits2[0]}
             }
-            console.log(stat)
             // stat={wins:wins[0],loses:lose[0],long:longest[0],topHits:toph} // TODO test response, maybe need modify wins[0] to wins[0].count... others too
             return stat;
         }else{
