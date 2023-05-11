@@ -13,6 +13,7 @@ var playerPoints2 = 0;
 var player2X = 720;
 var player2Y = 300;
 var playerDirection2 = "none";
+var playerHits2 = 0;
 // end variables player2
 
 var playerWidth = 5; // use for the 2 players
@@ -20,7 +21,8 @@ var playerHeight = 200; // use for the 2 players
 var playerHalf = playerHeight / 2; // use for the 2 players
 var playerSpeed = 250; // use for the 2 players
 var playerSpeedIncrement = 15;
-var playerDirection = "none";
+var playerHits1 = 0;
+var playerDirection = "none"
 
 var ballX = 400;
 var ballY = 300;
@@ -40,6 +42,12 @@ var currentMessage = "";
 var playerName1 = "";
 var playerName2 = "";
 
+var playerColor1 = "";
+var playerColor2 = "";
+
+var playerReady1 = false;
+var playerReady2 = false;
+
 
 function run(fps) {
 
@@ -47,7 +55,7 @@ function run(fps) {
 
     currentSound = ""
 
-    if (!roundStarted) return;
+    if (!roundStarted || !player1Ready || !player2Ready) return;
 
     const boardWidth = 800;
     const boardHeight = 600;
@@ -171,7 +179,7 @@ function run(fps) {
                 currentMessage = `${playerName1} wins! \n${playerName2} press SPACE to start a new game`
                 currentSound = "win"
                 // HERE DB INSERT
-                utilsdb.saveGame(playerName1,playerName2,playerPoints,playerPoints2,1);
+                utilsdb.saveGame(playerName1,playerName2,playerHits1, playerHits2, playerPoints,playerPoints2,1);
             } else {
                 currentMessage = `${playerName2} press SPACE to kick the ball`
             }
@@ -215,6 +223,7 @@ function run(fps) {
                 ballDirection = "upRight";
                 break;
         }
+        playerHits1++;
         ballX = intersectionPlayer[0] + 1;
         ballY = intersectionPlayer[1];
         ballSpeed = ballSpeed + ballSpeedIncrement;
@@ -229,6 +238,7 @@ function run(fps) {
                 ballDirection = "upLeft";
                 break;
         }
+        playerHits2++;
         ballX = intersectionPlayer2[0] - 1;
         ballY = intersectionPlayer2[1];
         ballSpeed = ballSpeed + ballSpeedIncrement;
@@ -305,7 +315,22 @@ function findIntersection(lineA, lineB) {
 }
 
 function getRst() {
-    return { type: "gameData", playerX: playerX, player2X: player2X, player2Y: player2Y, playerY: playerY, playerPoints: playerPoints, playerPoints2: playerPoints2, ballX: ballX, ballY: ballY, currentMessage: currentMessage, currentSound : currentSound, playerName1 : playerName1, playerName2: playerName2 }
+    return { 
+        type: "gameData", 
+        playerX: playerX, 
+        player2X: player2X,
+        player2Y: player2Y, 
+        playerY: playerY, 
+        playerPoints: playerPoints, 
+        playerPoints2: playerPoints2, 
+        ballX: ballX, 
+        ballY: ballY, 
+        currentMessage: currentMessage, 
+        currentSound : currentSound,
+        playerName1 : playerName1, 
+        playerName2: playerName2,
+        playerColor1: playerColor1,
+        playerColor2: playerColor2}
 }
 
 function updateDirection(player, state) {
@@ -317,6 +342,9 @@ function updateDirection(player, state) {
 }
 
 function kickBall(player) {
+    if (playerPoints == 0 && playerPoints2 == 0) {
+        utilsdb.setStartGame();
+    }
     if (player == startingPlayer && startingPlayer == 1 && !roundStarted) {
         if (playerPoints == 5 || playerPoints2 == 5) {
             playerPoints = 0
@@ -367,14 +395,21 @@ function reset() {
     playerDirection2 = "none"
 }
 
-function setPlayerName(player, name) {
+function setPlayer(player, name, color) {
     if (player == 1) {
         playerName1 = name;
+        playerColor1 = color;
+        player1Ready = true;
     } else {
         playerName2 = name;
+        playerColor2 = color;
+        player2Ready = true;
     }
+    console.log("playerset1:", playerName1, playerColor1)
+    console.log("playerset2:", playerName2, playerColor2)
+
     if (playerName1 != "" && playerName2 != "") {
         reset()
     }
 }
-module.exports = { run, getRst, updateDirection, kickBall, reset , setPlayerName }
+module.exports = { run, getRst, updateDirection, kickBall, reset , setPlayer }

@@ -4,7 +4,7 @@ const url = require("url");
 const post = require("./post.js");
 const { v4: uuidv4 } = require("uuid");
 const utils = require("./functions/gameLogic.js");
-const utilsdb=require('./functions/dbUtils.js');
+const utilsdb = require('./functions/dbUtils.js');
 
 // Wait 'ms' milliseconds
 function wait(ms) {
@@ -41,13 +41,13 @@ wss.on("connection", (ws) => {
       ws.close();
     } else {
       socketsClients.set("pl2", ws);
-      socketsClients.set( ws,2);
+      socketsClients.set(ws, 2);
       ws.send(JSON.stringify({ type: "setPlayer", player: 2 }))
       //TODO start game
     }
   } else {
     socketsClients.set("pl1", ws);
-    socketsClients.set( ws,1);
+    socketsClients.set(ws, 1);
     ws.send(JSON.stringify({ type: "setPlayer", player: 1 }))
     console.log("pl1")
   }
@@ -95,63 +95,77 @@ wss.on("connection", (ws) => {
       console.log(messageAsObject)
       utils.kickBall(messageAsObject.player)
     } else if (messageAsObject.type == "disconnectPlayer") {
-      utils.setPlayerName(1, "")
-      utils.setPlayerName(2, "")
+      utils.setPlayer(1, "", "")
+      utils.setPlayer(2, "", "")
       utils.reset()
       socketsClients.delete("pl1")
       socketsClients.delete("pl2")
       socketsClients.delete(ws)
       broadcast({ type: "disconnect" })
-    // }
-    //  else if (messageAsObject.type == "setPlayerName") {
-    //   console.log(messageAsObject.player, messageAsObject.name)
-    //   utils.setPlayerName(messageAsObject.player, messageAsObject.name)
-    }else if (messageAsObject.type == "login") {
-      if(messageAsObject.user && messageAsObject.password){
-        let result=utilsdb.login(messageAsObject.user,messageAsObject.password);
-        console.log("player:",socketsClients.get(ws));
-        if(result){
-          utils.setPlayerName(socketsClients.get(ws),messageAsObject.user)
-          var rst = { type: "login", message: 'OK' };
-          ws.send(JSON.stringify(rst));
-        }else{
-          var rst = { type: "login", message: 'KO' };
-          ws.send(JSON.stringify(rst));
-        }
-      }else{
+      // }
+      //  else if (messageAsObject.type == "setPlayerName") {
+      //   console.log(messageAsObject.player, messageAsObject.name)
+      //   utils.setPlayerName(messageAsObject.player, messageAsObject.name)
+    } else if (messageAsObject.type == "login") {
+      if (messageAsObject.user && messageAsObject.password) {
+        utilsdb.login(messageAsObject.user, messageAsObject.password).then(
+          (result) => {
+            console.log("player:", socketsClients.get(ws));
+            console.log(result)
+            if (result) {
+              var rst = { type: "login", message: 'OK', name:result.name, color:result.color };
+              ws.send(JSON.stringify(rst));
+            } else {
+              var rst = { type: "login", message: 'KO' };
+              ws.send(JSON.stringify(rst));
+            }
+          }
+        )
+      } else {
         var rst = { type: "login", message: 'KO' };
-          ws.send(JSON.stringify(rst));
+        ws.send(JSON.stringify(rst));
       }
-    }else if (messageAsObject.type == "singup") {
-      if(messageAsObject.user && messageAsObject.password && messageAsObject.color){
-        let result=utilsdb.singup(messageAsObject.user,messageAsObject.password,messageAsObject.color,socketsClients.get(ws))
-        if(result){
-          var rst = { type: "signup", message: 'OK' };
-          ws.send(JSON.stringify(rst));
-        }else{
-          var rst = { type: "signup", message: 'KO' };
-          ws.send(JSON.stringify(rst));
-        }
-      }else{
+    } else if (messageAsObject.type == "singup") {
+      if (messageAsObject.user && messageAsObject.password && messageAsObject.color) {
+        utilsdb.singup(messageAsObject.user, messageAsObject.password, messageAsObject.color).then(
+          (result) => {
+            if (result) {
+              var rst = { type: "signup", message: 'OK', name:result.name, color:result.color };
+              ws.send(JSON.stringify(rst));
+            } else {
+              var rst = { type: "signup", message: 'KO' };
+              ws.send(JSON.stringify(rst));
+            }
+          })
+      } else {
         var rst = { type: "signup", message: 'KO' };
         ws.send(JSON.stringify(rst));
       }
-    }else if (messageAsObject.type == "listUsers") {
+    } else if (messageAsObject.type == "listUsers") {
       var rst = { type: "listUser", message: 'KO' };
-      let result=utilsdb.list();
-      if(result){
-        rst = { type: "listUser", message: 'OK' ,data:result};
-      }
-      ws.send(JSON.stringify(rst));
-    }else if (messageAsObject.type == "stats") {
+      utilsdb.list().then(
+        (result) => {
+          rst = { type: "listUser", message: 'OK', data: result };
+          ws.send(JSON.stringify(rst));
+        });
+    } else if (messageAsObject.type == "stats") {
       var rst = { type: "stats", message: 'KO' };
-      if(messageAsObject.user){
-        let result=utilsdb.stats();
-        if(result){
-          rst = { type: "stats", message: 'OK' ,data:result};
-        }
+      if (messageAsObject.user) {
+        utilsdb.stats(messageAsObject.user).then((result) => {
+          console.log("res: ",result != false)
+          if (result) {
+            rst = { type: "stats", message: 'OK', data: result };
+          }
+          ws.send(JSON.stringify(rst));
+        })
       }
-      ws.send(JSON.stringify(rst));
+    } else if (messageAsObject.type == "playerReady") {
+      var rst = { type: "playerReady", message: 'KO' };
+      if (messageAsObject.player && messageAsObject.username && messageAsObject.color) {
+        utils.setPlayer(messageAsObject.player, messageAsObject.username, messageAsObject.color);
+        rst = {type:"playerReady", message: "OK"}
+        ws.send(JSON.stringify(rst));
+      }
     }
   });
 });
@@ -187,16 +201,13 @@ let fpsStartTime = Date.now();
 let currentFPS = 0;
 
 function gameLoop() {
-  
-  const startTime = Date.now();
-  
+
+  const startTime = new Date();
+
   if (currentFPS >= 1) {
     if (socketsClients.has("pl1")) {
       if (socketsClients.has("pl2")) {
         // if the players are online the game starts
-        if(!utilsdb.startGame){
-          utilsdb.startGame=Date.now();
-        }
         utils.run(currentFPS.toFixed(2));
         broadcast(utils.getRst());
       }
